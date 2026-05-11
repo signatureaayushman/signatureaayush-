@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signature Aayush — Digital Architecture & Experience Engineering</title>
+    <meta name="description" content="Signature Aayush — Strategic digital architecture, conversion systems, and bespoke experience engineering for enterprise brands and funded startups.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Playfair Display', 'Georgia', 'serif'],
+                    },
+                    colors: {
+                        obsidian: '#0a0a0b',
+                        ink: '#121214',
+                        graphite: '#1a1a1e',
+                        slate: '#2a2a2f',
+                        frost: '#e8e8ec',
+                        pearl: '#f5f5f7',
+                        gold: '#c9a96e',
+                        goldLight: '#d4b87a',
+                        goldDim: '#8a7a5c',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: auto; }
+        body { 
+            font-family: 'Inter', system-ui, sans-serif; 
+            background: #0a0a0b; 
+            color: #e8e8ec; 
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        ::selection { background: rgba(201,169,110,0.3); color: #f5f5f7; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0b; }
+        ::-webkit-scrollbar-thumb { background: #2a2a2f; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #c9a96e; }
+
+        html.lenis, html.lenis body { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
+        .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+        .lenis.lenis-stopped { overflow: hidden; }
+
+        #webgl-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; pointer-events: none; opacity: 0.6;
+        }
+
+        .magnetic-btn {
+            position: relative; display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .magnetic-btn-inner {
+            position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 1rem 2.5rem; border-radius: 50px;
+            background: linear-gradient(135deg, #c9a96e, #d4b87a);
+            color: #0a0a0b; font-weight: 600; font-size: 0.875rem; letter-spacing: 0.05em;
+            text-transform: uppercase; overflow: hidden; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .magnetic-btn:hover .magnetic-btn-inner {
+            background: linear-gradient(135deg, #d4b87a, #e8c88a);
+            box-shadow: 0 10px 40px rgba(201,169,110,0.3);
+        }
+        .magnetic-btn::before {
+            content: ''; position: absolute; inset: -2px; border-radius: 50px;
+            background: linear-gradient(135deg, #c9a96e, #8a7a5c, #c9a96e);
+            background-size: 200% 200%; animation: shimmer 3s ease infinite;
+            z-index: 0; opacity: 0; transition: opacity 0.3s;
+        }
+        .magnetic-btn:hover::before { opacity: 1; }
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass {
+            background: rgba(18, 18, 20, 0.7);
+            backdrop-filter: blur(20px) saturate(1.2);
+            -webkit-backdrop-filter: blur(20px) saturate(1.2);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .glass-strong {
+            background: rgba(26, 26, 30, 0.85);
+            backdrop-filter: blur(30px) saturate(1.4);
+            -webkit-backdrop-filter: blur(30px) saturate(1.4);
+            border: 1px solid rgba(201,169,110,0.1);
+        }
+
+        .reveal-text { overflow: hidden; }
+        .reveal-text span { display: inline-block; transform: translateY(100%); }
+
+        .line-reveal { 
+            width: 0; height: 1px; background: linear-gradient(90deg, #c9a96e, transparent);
+            transition: width 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .line-reveal.active { width: 100%; }
+
+        .counter-value { font-variant-numeric: tabular-nums; }
+
+        .portfolio-card {
+            position: relative; overflow: hidden; border-radius: 16px;
+            background: #1a1a1e; border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .portfolio-card:hover {
+            border-color: rgba(201,169,110,0.3);
+            transform: translateY(-8px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+        }
+        .portfolio-card .card-overlay {
+            position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, rgba(10,10,11,0.95) 100%);
+            opacity: 0.8; transition: opacity 0.4s;
+        }
+        .portfolio-card:hover .card-overlay { opacity: 0.95; }
+        .portfolio-card .card-content {
+            position: absolute; bottom: 0; left: 0; right: 0; padding: 2rem;
+            transform: translateY(20px); opacity: 0;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .portfolio-card:hover .card-content { transform: translateY(0); opacity: 1; }
+        .portfolio-card .card-img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .portfolio-card:hover .card-img { transform: scale(1.08); }
+
+        .service-card {
+            position: relative; padding: 2.5rem; border-radius: 20px;
+            background: rgba(26,26,30,0.5); border: 1px solid rgba(255,255,255,0.04);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .service-card::before {
+            content: ''; position: absolute; inset: 0; border-radius: 20px;
+            background: linear-gradient(135deg, rgba(201,169,110,0.05), transparent);
+            opacity: 0; transition: opacity 0.5s;
+        }
+        .service-card:hover::before { opacity: 1; }
+        .service-card:hover {
+            border-color: rgba(201,169,110,0.15);
+            transform: translateY(-4px);
+            background: rgba(26,26,30,0.8);
+        }
+        .service-card .service-num {
+            font-family: 'Playfair Display', serif; font-size: 4rem; font-weight: 700;
+            color: rgba(201,169,110,0.1); line-height: 1;
+            transition: color 0.5s;
+        }
+        .service-card:hover .service-num { color: rgba(201,169,110,0.2); }
+
+        .process-step {
+            position: relative; padding-left: 3rem;
+        }
+        .process-step::before {
+            content: attr(data-step); position: absolute; left: 0; top: 0;
+            font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700;
+            color: rgba(201,169,110,0.15); line-height: 1;
+        }
+        .process-line {
+            position: absolute; left: 1.25rem; top: 3rem; bottom: -2rem;
+            width: 1px; background: linear-gradient(180deg, rgba(201,169,110,0.3), transparent);
+        }
+
+        .testimonial-card {
+            padding: 2.5rem; border-radius: 20px;
+            background: rgba(18,18,20,0.6); border: 1px solid rgba(255,255,255,0.04);
+            transition: all 0.4s;
+        }
+        .testimonial-card:hover {
+            border-color: rgba(201,169,110,0.1);
+            background: rgba(18,18,20,0.8);
+        }
+
+        .pricing-card {
+            position: relative; padding: 2.5rem; border-radius: 24px;
+            background: rgba(26,26,30,0.6); border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .pricing-card.featured {
+            background: rgba(26,26,30,0.9);
+            border-color: rgba(201,169,110,0.25);
+            box-shadow: 0 20px 60px rgba(201,169,110,0.08);
+        }
+        .pricing-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(201,169,110,0.2);
+        }
+        .pricing-card.featured:hover {
+            box-shadow: 0 30px 80px rgba(201,169,110,0.12);
+        }
+
+        .form-input {
+            width: 100%; padding: 1rem 1.25rem; border-radius: 12px;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            color: #f5f5f7; font-size: 0.9375rem; transition: all 0.3s;
+        }
+        .form-input:focus {
+            outline: none; border-color: rgba(201,169,110,0.4);
+            background: rgba(255,255,255,0.05);
+            box-shadow: 0 0 20px rgba(201,169,110,0.05);
+        }
+        .form-input::placeholder { color: rgba(232,232,236,0.3); }
+
+        .nav-link {
+            position: relative; font-size: 0.8125rem; font-weight: 500;
+            letter-spacing: 0.05em; text-transform: uppercase;
+            color: rgba(232,232,236,0.6); transition: color 0.3s;
+        }
+        .nav-link::after {
+            content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px;
+            background: #c9a96e; transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .nav-link:hover { color: #f5f5f7; }
+        .nav-link:hover::after { width: 100%; }
+
+        .logo-item {
+            filter: grayscale(100%) brightness(0.5);
+            opacity: 0.4; transition: all 0.4s;
+        }
+        .logo-item:hover { filter: grayscale(0%) brightness(1); opacity: 1; }
+
+        .availability {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 1rem; border-radius: 50px;
+            background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2);
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em;
+            text-transform: uppercase; color: #4ade80;
+        }
+        .availability-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: #4ade80;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .noise {
+            position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .mobile-menu {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(10,10,11,0.98); backdrop-filter: blur(20px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.5s;
+        }
+        .mobile-menu.active { opacity: 1; pointer-events: all; }
+        .mobile-menu a { font-size: 1.5rem; font-weight: 500; color: #f5f5f7; }
+
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; z-index: 101; }
+        .hamburger span {
+            display: block; width: 24px; height: 1.5px; background: #f5f5f7;
+            transition: all 0.3s;
+        }
+        .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+        .hamburger.active span:nth-child(2) { opacity: 0; }
+        .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
+        @media (max-width: 1024px) {
+            .hamburger { display: flex; }
+            .desktop-nav { display: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            #webgl-canvas { display: none; }
+        }
+
+        .cursor-glow {
+            position: fixed; width: 300px; height: 300px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(201,169,110,0.08) 0%, transparent 70%);
+            pointer-events: none; z-index: 1; transform: translate(-50%, -50%);
+            transition: opacity 0.3s; opacity: 0;
+        }
+
+        .section-label {
+            display: inline-flex; align-items: center; gap: 0.75rem;
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 0.15em;
+            text-transform: uppercase; color: rgba(201,169,110,0.7);
+        }
+        .section-label::before {
+            content: ''; width: 32px; height: 1px; background: rgba(201,169,110,0.4);
+        }
+
+        .quote-mark {
+            font-family: 'Playfair Display', serif; font-size: 6rem; line-height: 1;
+            color: rgba(201,169,110,0.1); position: absolute; top: -1rem; left: 1.5rem;
+        }
+
+        .wizard-step { display: none; }
+        .wizard-step.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .wizard-progress {
+            display: flex; gap: 0.5rem; margin-bottom: 2rem;
+        }
+        .wizard-progress-bar {
+            flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.08);
+            transition: background 0.4s;
+        }
+        .wizard-progress-bar.active { background: #c9a96e; }
+        .wizard-progress-bar.completed { background: rgba(201,169,110,0.5); }
+
+        .radio-card {
+            padding: 1.25rem; border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.08);
+            cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 1rem;
+        }
+        .radio-card:hover { border-color: rgba(201,169,110,0.3); background: rgba(201,169,110,0.03); }
+        .radio-card.selected { border-color: #c9a96e; background: rgba(201,169,110,0.06); }
+        .radio-card .radio-circle {
+            width: 20px; height: 20px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            transition: all 0.3s;
+        }
+        .radio-card.selected .radio-circle { border-color: #c9a96e; background: #c9a96e; }
+        .radio-card.selected .radio-circle::after {
+            content: ''; width: 6px; height: 6px; border-radius: 50%; background: #0a0a0b;
+        }
+
+        .tag {
+            display: inline-flex; padding: 0.375rem 0.875rem; border-radius: 50px;
+            background: rgba(201,169,110,0.08); border: 1px solid rgba(201,169,110,0.15);
+            font-size: 0.75rem; font-weight: 500; color: #c9a96e; letter-spacing: 0.02em;
+        }
+
+        .gold-divider {
+            width: 60px; height: 2px; background: linear-gradient(90deg, #c9a96e, transparent);
+            border-radius: 1px;
+        }
+
+        img { opacity: 0; transition: opacity 0.6s ease; }
+        img.loaded { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="noise"></div>
+    <div class="cursor-glow" id="cursorGlow"></div>
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
+        <div class="w-full px-6 lg:px-12 py-5 flex items-center justify-between">
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-goldDim flex items-center justify-center">
+                    <span class="text-obsidian font-bold text-sm">SA</span>
+                </div>
+                <span class="font-display text-xl font-semibold text-frost tracking-tight group-hover:text-gold transition-colors">Signature Aayush</span>
+            </a>
+
+            <div class="desktop-nav hidden lg:flex items-center gap-10">
+                <a href="#positioning" class="nav-link">Positioning</a>
+                <a href="#portfolio" class="nav-link">Work</a>
+                <a href="#services" class="nav-link">Services</a>
+                <a href="#process" class="nav-link">Process</a>
+                <a href="#inquiry" class="nav-link">Inquire</a>
+            </div>
+
+            <div class="hidden lg:flex items-center gap-6">
+                <div class="availability">
+                    <span class="availability-dot"></span>
+                    <span>Available Q2 2026</span>
+                </div>
+                <a href="#inquiry" class="magnetic-btn">
+                    <span class="magnetic-btn-inner text-xs">Start Project</span>
+                </a>
+            </div>
+
+            <div class="hamburger lg:hidden" id="hamburger">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#positioning" onclick="closeMobileMenu()">Positioning</a>
+        <a href="#portfolio" onclick="closeMobileMenu()">Work</a>
+        <a href="#services" onclick="closeMobileMenu()">Services</a>
+        <a href="#process" onclick="closeMobileMenu()">Process</a>
+        <a href="#inquiry" onclick="closeMobileMenu()">Inquire</a>
+        <div class="availability mt-4">
+            <span class="availability-dot"></span>
+            <span>Available Q2 2026</span>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div class="relative z-10 w-full px-6 lg:px-12 pt-32 pb-20">
+            <div class="max-w-6xl mx-auto">
+                <div class="mb-8 opacity-0" id="heroLabel">
+                    <span class="section-label">Digital Architecture Studio</span>
+                </div>
+
+                <h1 class="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-semibold text-frost leading-[0.95] tracking-tight mb-8">
+                    <div class="reveal-text"><span id="heroLine1">I engineer</span></div>
+                    <div class="reveal-text"><span id="heroLine2" class="text-gold italic">digital assets</span></div>
+                    <div class="reveal-text"><span id="heroLine3">that convert.</span></div>
+                </h1>
+
+                <div class="max-w-xl opacity-0" id="heroSub">
+                    <p class="text-lg md:text-xl text-frost/60 leading-relaxed mb-10">
+                        Strategic digital experiences for enterprise brands, funded startups, and design agencies that demand precision engineering.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-6">
+                        <a href="#inquiry" class="magnetic-btn">
+                            <span class="magnetic-btn-inner">
+                                Initiate Project
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </span>
+                        </a>
+                        <a href="#portfolio" class="text-sm font-medium text-frost/50 hover:text-gold transition-colors tracking-wide uppercase">View Select Work</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 opacity-0" id="scrollInd">
+            <div class="flex flex-col items-center gap-3">
+                <span class="text-[10px] uppercase tracking-[0.3em] text-frost/30">Scroll</span>
+                <div class="w-px h-12 bg-gradient-to-b from-gold/50 to-transparent"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Positioning Section -->
+    <section id="positioning" class="relative py-32 lg:py-40">
+        <div class="w-full px-6 lg:px-12">
+            <div class="max-w-6xl mx-auto">
+                <div class="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
+                    <div>
+                        <div class="section-label mb-6">What I Actually Do</div>
+                        <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-semibold text-frost leading-tight mb-8">
+                            Not a web developer.<br>
+                            <span class="text-gold italic">A digital architect.</span>
+                        </h2>
+                        <div class="gold-divider mb-8"></div>
+                        <p class="text-frost/50 text-lg leading-relaxed mb-6">
+                            I don't build websites. I architect strategic digital assets engineered to perform. Every pixel serves a business objective. Every interaction is calculated. Every line of code is precision.
+                        </p>
+                        <p class="text-frost/50 text-lg leading-relaxed">
+                            My clients don't hire me for pages. They hire me for transformation — the kind that turns digital presence into competitive advantage.
+                        </p>
+                    </div>
+
+                    <div class="space-y-6 lg:pt-20">
+                        <div class="glass-strong rounded-2xl p-8">
+                            <div class="flex items-start gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-frost font-semibold text-lg mb-2">Digital Architecture</h3>
+                                    <p class="text-frost/40 text-sm leading-relaxed">Structural design of digital ecosystems that scale with your business, not against it.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-strong rounded-2xl p-8">
+                            <div class="flex items-start gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-frost font-semibold text-lg mb-2">Experience Engineering</h3>
+                                    <p class="text-frost/40 text-sm leading-relaxed">Motion, interaction, and psychological design that creates emotional connection at scale.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-strong rounded-2xl p-8">
+                            <div class="flex items-start gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-frost font-semibold text-lg mb-2">Conversion Systems</h3>
+                                    <p class="text-frost/40 text-sm leading-relaxed">Data-driven pathways engineered to transform visitors into measurable business outcomes.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="relative py-32 lg:py-40">
+        <div class="w-full px-6 lg:px-12">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-16">
+                    <div>
+                        <div class="section-label mb-6">Select Work</div>
+                        <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-semibold text-frost leading-tight">
+                            Strategic outcomes,<br>
+                            <span class="text-gold italic">not screenshots.</span>
+                        </h2>
+                    </div>
+                    <p class="text-frost/40 text-sm max-w-sm mt-6 lg:mt-0 leading-relaxed">
+                        Each project represents a business transformation. Client identities protected under strict confidentiality agreements.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="portfolio-card aspect-[4/5] group" data-project="1">
+                        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80" alt="Enterprise SaaS Dashboard" class="card-img" loading="lazy" onload="this.classList.add('loaded')">
+                        <div class="card-overlay"></div>
+                        <div class="card-content">
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="tag">SaaS Platform</span>
+                                <span class="tag">Conversion +340%</span>
+                            </div>
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-2">Enterprise Analytics Suite</h3>
+                            <p class="text-frost/50 text-sm leading-relaxed mb-4">Redesigned the core product experience for a B2B analytics platform serving 50K+ enterprise users.</p>
+                            <div class="flex items-center gap-4 text-xs text-frost/40 uppercase tracking-wider">
+                                <span>Problem: 68% churn</span>
+                                <span class="text-gold">→</span>
+                                <span>Result: 12% churn</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-card aspect-[4/5] group" data-project="2">
+                        <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80" alt="Luxury E-commerce" class="card-img" loading="lazy" onload="this.classList.add('loaded')">
+                        <div class="card-overlay"></div>
+                        <div class="card-content">
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="tag">Luxury E-commerce</span>
+                                <span class="tag">Revenue +280%</span>
+                            </div>
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-2">Heritage Fashion House</h3>
+                            <p class="text-frost/50 text-sm leading-relaxed mb-4">Digital flagship store for a century-old luxury brand. Immersive product storytelling with AR integration.</p>
+                            <div class="flex items-center gap-4 text-xs text-frost/40 uppercase tracking-wider">
+                                <span>Problem: Low engagement</span>
+                                <span class="text-gold">→</span>
+                                <span>Result: 4.2min avg session</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-card aspect-[4/5] group" data-project="3">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" alt="Fintech Platform" class="card-img" loading="lazy" onload="this.classList.add('loaded')">
+                        <div class="card-overlay"></div>
+                        <div class="card-content">
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="tag">Fintech</span>
+                                <span class="tag">Onboarding +450%</span>
+                            </div>
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-2">Wealth Management Platform</h3>
+                            <p class="text-frost/50 text-sm leading-relaxed mb-4">Complete UX overhaul for a wealth-tech startup. Simplified complex financial data into intuitive dashboards.</p>
+                            <div class="flex items-center gap-4 text-xs text-frost/40 uppercase tracking-wider">
+                                <span>Problem: 3% completion</span>
+                                <span class="text-gold">→</span>
+                                <span>Result: 78% completion</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-card aspect-[4/5] group" data-project="4">
+                        <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80" alt="Real Estate Platform" class="card-img" loading="lazy" onload="this.classList.add('loaded')">
+                        <div class="card-overlay"></div>
+                        <div class="card-content">
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="tag">PropTech</span>
+                                <span class="tag">Leads +520%</span>
+                            </div>
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-2">Premium Property Portal</h3>
+                            <p class="text-frost/50 text-sm leading-relaxed mb-4">High-end real estate discovery platform with virtual tours, 3D walkthroughs, and AI-powered matching.</p>
+                            <div class="flex items-center gap-4 text-xs text-frost/40 uppercase tracking-wider">
+                                <span>Problem: Low inquiry rate</span>
+                                <span class="text-gold">→</span>
+                                <span>Result: 12% inquiry rate</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-card aspect-[4/5] group" data-project="5">
+                        <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80" alt="Healthcare Platform" class="card-img" loading="lazy" onload="this.classList.add('loaded')">
+                        <div class="card-overlay"></div>
+                        <div class="card-content">
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="tag">HealthTech</span>
+                                <span class="tag">Bookings +390%</span>
+                            </div>
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-2">Medical Practice Ecosystem</h3>
+                            <p class="text-frost/50 text-sm leading-relaxed mb-4">Patient-centric digital experience for a multi-location medical group. HIPAA-compliant with seamless scheduling.</p>
+                            <div class="flex items-center gap-4 text-xs text-frost/40 uppercase tracking-wider">
+                                <span>Problem: Phone-only booking</span>
+                                <span class="text-gold">→</span>
+                                <span>Result: 85% online</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-card aspect-[4/5] group" data-project="6">
+                        <img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=80" alt="Creative Agency" class="card-img" loading="lazy" onload="this.classList.add('loaded')">
+                        <div class="card-overlay"></div>
+                        <div class="card-content">
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="tag">Creative Agency</span>
+                                <span class="tag">Pipeline +200%</span>
+                            </div>
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-2">Award-Winning Studio Rebrand</h3>
+                            <p class="text-frost/50 text-sm leading-relaxed mb-4">Complete digital identity and portfolio system for a top-tier creative agency. Designed to attract enterprise clients.</p>
+                            <div class="flex items-center gap-4 text-xs text-frost/40 uppercase tracking-wider">
+                                <span>Problem: Perceived as small</span>
+                                <span class="text-gold">→</span>
+                                <span>Result: Fortune 500 clients</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="relative py-32 lg:py-40">
+        <div class="w-full px-6 lg:px-12">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-20">
+                    <div class="section-label justify-center mb-6">Premium Offerings</div>
+                    <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-semibold text-frost leading-tight mb-6">
+                        Services as <span class="text-gold italic">products.</span>
+                    </h2>
+                    <p class="text-frost/40 max-w-2xl mx-auto text-lg leading-relaxed">
+                        Each offering is a complete transformation system, not a task list. I deliver outcomes, not deliverables.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="service-card">
+                        <div class="service-num">01</div>
+                        <h3 class="font-display text-2xl font-semibold text-frost mt-4 mb-3">Digital Architecture</h3>
+                        <p class="text-frost/40 leading-relaxed mb-6">
+                            Structural design of complete digital ecosystems. Information architecture, user flow optimization, and scalable system design that grows with your business.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="tag">Information Architecture</span>
+                            <span class="tag">UX Strategy</span>
+                            <span class="tag">System Design</span>
+                        </div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-num">02</div>
+                        <h3 class="font-display text-2xl font-semibold text-frost mt-4 mb-3">Conversion Systems</h3>
+                        <p class="text-frost/40 leading-relaxed mb-6">
+                            Psychology-driven interface engineering. Every interaction is calculated to move users toward business objectives. A/B tested, data-validated, performance-proven.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="tag">CRO</span>
+                            <span class="tag">Funnel Design</span>
+                            <span class="tag">Analytics</span>
+                        </div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-num">03</div>
+                        <h3 class="font-display text-2xl font-semibold text-frost mt-4 mb-3">Brand Experience Engineering</h3>
+                        <p class="text-frost/40 leading-relaxed mb-6">
+                            Immersive digital brand environments that communicate luxury, trust, and authority. Motion design, micro-interactions, and emotional connection at every touchpoint.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="tag">Motion Design</span>
+                            <span class="tag">Micro-interactions</span>
+                            <span class="tag">Brand Systems</span>
+                        </div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-num">04</div>
+                        <h3 class="font-display text-2xl font-semibold text-frost mt-4 mb-3">Performance Optimization</h3>
+                        <p class="text-frost/40 leading-relaxed mb-6">
+                            Sub-second load times, perfect Lighthouse scores, and buttery-smooth interactions. Technical excellence that directly impacts SEO, bounce rates, and conversions.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="tag">Core Web Vitals</span>
+                            <span class="tag">Lazy Loading</span>
+                            <span class="tag">CDN Strategy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section id="process" class="relative py-32 lg:py-40">
+        <div class="w-full px-6 lg:px-12">
+            <div class="max-w-6xl mx-auto">
+                <div class="grid lg:grid-cols-2 gap-16 lg:gap-24">
+                    <div class="lg:sticky lg:top-32 lg:self-start">
+                        <div class="section-label mb-6">The Process</div>
+                        <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-semibold text-frost leading-tight mb-6">
+                            Enterprise workflow.<br>
+                            <span class="text-gold italic">Boutique precision.</span>
+                        </h2>
+                        <p class="text-frost/40 text-lg leading-relaxed mb-8">
+                            A six-phase system designed to eliminate risk, ensure alignment, and deliver outcomes that exceed expectations. Every phase has clear milestones and deliverables.
+                        </p>
+                        <div class="glass-strong rounded-2xl p-6">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="text-frost font-semibold text-sm">Risk-Free Engagement</div>
+                                    <div class="text-frost/40 text-xs mt-0.5">Discovery phase commitment only. Full project approval required to proceed.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-12 relative">
+                        <div class="process-step" data-step="01">
+                            <div class="process-line"></div>
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-3">Discovery</h3>
+                            <p class="text-frost/40 leading-relaxed">
+                                Deep-dive into your business model, competitive landscape, user psychology, and technical requirements. I don't start designing until I understand your business better than you do.
+                            </p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">Stakeholder Interviews</span>
+                                <span class="text-xs text-frost/30">•</span>
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">Competitive Audit</span>
+                                <span class="text-xs text-frost/30">•</span>
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">User Research</span>
+                            </div>
+                        </div>
+
+                        <div class="process-step" data-step="02">
+                            <div class="process-line"></div>
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-3">Strategy</h3>
+                            <p class="text-frost/40 leading-relaxed">
+                                Information architecture, user journey mapping, conversion pathway design, and technical architecture planning. The blueprint that ensures every decision serves the business.
+                            </p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">Sitemap</span>
+                                <span class="text-xs text-frost/30">•</span>
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">User Flows</span>
+                                <span class="text-xs text-frost/30">•</span>
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">Tech Stack</span>
+                            </div>
+                        </div>
+
+                        <div class="process-step" data-step="03">
+                            <div class="process-line"></div>
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-3">Prototyping</h3>
+                            <p class="text-frost/40 leading-relaxed">
+                                High-fidelity interactive prototypes with real content, actual data, and production-ready design systems. See and feel the experience before a single line of code is written.
+                            </p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">Wireframes</span>
+                                <span class="text-xs text-frost/30">•</span>
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">Design System</span>
+                                <span class="text-xs text-frost/30">•</span>
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">Clickable Prototype</span>
+                            </div>
+                        </div>
+
+                        <div class="process-step" data-step="04">
+                            <div class="process-line"></div>
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-3">Engineering</h3>
+                            <p class="text-frost/40 leading-relaxed">
+                                Clean, modular, production-grade code. Component-based architecture, performance-optimized assets, accessibility compliance, and cross-browser perfection.
+                            </p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">Clean Code</span>
+                                <span class="text-xs text-frost/30">•</span>
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">Performance</span>
+                                <span class="text-xs text-frost/30">•</span>
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">Accessibility</span>
+                            </div>
+                        </div>
+
+                        <div class="process-step" data-step="05">
+                            <div class="process-line"></div>
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-3">Launch</h3>
+                            <p class="text-frost/40 leading-relaxed">
+                                Staged deployment, analytics integration, SEO optimization, and performance monitoring setup. Your site doesn't just go live — it's engineered to perform from minute one.
+                            </p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">SEO Setup</span>
+                                <span class="text-xs text-frost/30">•</span>
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">Analytics</span>
+                                <span class="text-xs text-frost/30">•</span>
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">Monitoring</span>
+                            </div>
+                        </div>
+
+                        <div class="process-step" data-step="06">
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-3">Optimization</h3>
+                            <p class="text-frost/40 leading-relaxed">
+                                Post-launch analysis, A/B testing, conversion rate optimization, and continuous refinement. The launch is just the beginning of the performance journey.
+                            </p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">A/B Testing</span>
+                                <span class="text-xs text-frost/30">•</span>
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">Heatmaps</span>
+                                <span class="text-xs text-frost/30">•</span>
+                                <span class="text-xs text-frost/30 uppercase tracking-wider">CRO</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Authority / Manifesto Section -->
+    <section id="authority" class="relative py-32 lg:py-40">
+        <div class="w-full px-6 lg:px-12">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="section-label justify-center mb-8">Philosophy</div>
+                <blockquote class="relative">
+                    <span class="quote-mark">"</span>
+                    <p class="font-display text-3xl md:text-4xl lg:text-5xl font-medium text-frost leading-tight italic">
+                        I don't write code. I engineer conviction. Every interaction is a decision point. Every animation communicates intention. Every pixel earns its place.
+                    </p>
+                </blockquote>
+                <div class="mt-12 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
+                    <div class="text-center">
+                        <div class="font-display text-4xl font-bold text-gold counter-value" data-target="50">0</div>
+                        <div class="text-frost/40 text-sm mt-2 uppercase tracking-wider">Projects Delivered</div>
+                    </div>
+                    <div class="w-px h-12 bg-frost/10 hidden md:block"></div>
+                    <div class="text-center">
+                        <div class="font-display text-4xl font-bold text-gold counter-value" data-target="98">0</div>
+                        <div class="text-frost/40 text-sm mt-2 uppercase tracking-wider">Client Retention %</div>
+                    </div>
+                    <div class="w-px h-12 bg-frost/10 hidden md:block"></div>
+                    <div class="text-center">
+                        <div class="font-display text-4xl font-bold text-gold counter-value" data-target="340">0</div>
+                        <div class="text-frost/40 text-sm mt-2 uppercase tracking-wider">Avg. Conversion Lift %</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof Section -->
+    <section id="testimonials" class="relative py-32 lg:py-40">
+        <div class="w-full px-6 lg:px-12">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16">
+                    <div class="section-label justify-center mb-6">Client Experiences</div>
+                    <h2 class="font-display text-4xl md:text-5xl font-semibold text-frost leading-tight">
+                        Trusted by brands that<br>
+                        <span class="text-gold italic">refuse mediocrity.</span>
+                    </h2>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-12 mb-20 opacity-60">
+                    <div class="logo-item flex items-center gap-2">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                        <span class="font-semibold text-frost">Enterprise SaaS</span>
+                    </div>
+                    <div class="logo-item flex items-center gap-2">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                        <span class="font-semibold text-frost">Fintech Startup</span>
+                    </div>
+                    <div class="logo-item flex items-center gap-2">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                        <span class="font-semibold text-frost">Luxury Brand</span>
+                    </div>
+                    <div class="logo-item flex items-center gap-2">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                        <span class="font-semibold text-frost">Creative Agency</span>
+                    </div>
+                    <div class="logo-item flex items-center gap-2">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        <span class="font-semibold text-frost">HealthTech</span>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="testimonial-card">
+                        <div class="flex items-center gap-1 mb-4">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </div>
+                        <p class="text-frost/70 leading-relaxed mb-6">
+                            "Aayushman doesn't just build websites — he builds business assets. Our conversion rate jumped 340% within 60 days of launch. That's not design, that's engineering."
+                        </p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
+                                <span class="text-gold font-semibold text-sm">SK</span>
+                            </div>
+                            <div>
+                                <div class="text-frost font-medium text-sm">Strategy Lead</div>
+                                <div class="text-frost/40 text-xs">Enterprise SaaS Platform</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card">
+                        <div class="flex items-center gap-1 mb-4">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </div>
+                        <p class="text-frost/70 leading-relaxed mb-6">
+                            "The attention to detail is surgical. Every animation, every transition, every micro-interaction serves a purpose. Our brand perception completely transformed."
+                        </p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
+                                <span class="text-gold font-semibold text-sm">AR</span>
+                            </div>
+                            <div>
+                                <div class="text-frost font-medium text-sm">Creative Director</div>
+                                <div class="text-frost/40 text-xs">Award-Winning Design Studio</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card">
+                        <div class="flex items-center gap-1 mb-4">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#c9a96e"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </div>
+                        <p class="text-frost/70 leading-relaxed mb-6">
+                            "Working with Signature Aayush felt like hiring a strategic partner, not a vendor. The process was as premium as the output. Worth every rupee and then some."
+                        </p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
+                                <span class="text-gold font-semibold text-sm">VP</span>
+                            </div>
+                            <div>
+                                <div class="text-frost font-medium text-sm">VP of Marketing</div>
+                                <div class="text-frost/40 text-xs">Series B Fintech Startup</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="relative py-32 lg:py-40">
+        <div class="w-full px-6 lg:px-12">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-16">
+                    <div class="section-label justify-center mb-6">Investment</div>
+                    <h2 class="font-display text-4xl md:text-5xl font-semibold text-frost leading-tight mb-6">
+                        Premium work demands<br>
+                        <span class="text-gold italic">premium investment.</span>
+                    </h2>
+                    <p class="text-frost/40 max-w-xl mx-auto">
+                        No templates. No shortcuts. Every project is bespoke engineering tailored to your business objectives.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="pricing-card">
+                        <div class="mb-6">
+                            <div class="text-frost/40 text-sm uppercase tracking-wider mb-2">Foundation</div>
+                            <div class="font-display text-3xl font-bold text-frost">₹5,000 – ₹10,000</div>
+                        </div>
+                        <p class="text-frost/40 text-sm leading-relaxed mb-6">
+                            For startups and small businesses ready to establish a serious digital presence. Strategic landing pages, business websites, and conversion-focused portfolios.
+                        </p>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Single-page or up to 5 pages
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Custom design system
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Mobile-first responsive
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Basic SEO setup
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                2 revision rounds
+                            </li>
+                        </ul>
+                        <a href="#inquiry" class="block w-full text-center py-3 rounded-xl border border-frost/10 text-frost/60 text-sm font-medium hover:border-gold/30 hover:text-gold transition-all">
+                            Start with Foundation
+                        </a>
+                    </div>
+
+                    <div class="pricing-card featured">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+                            <span class="bg-gold text-obsidian text-xs font-semibold px-4 py-1 rounded-full uppercase tracking-wider">Most Popular</span>
+                        </div>
+                        <div class="mb-6">
+                            <div class="text-gold text-sm uppercase tracking-wider mb-2">Growth</div>
+                            <div class="font-display text-3xl font-bold text-frost">₹10,001 – ₹15,000</div>
+                        </div>
+                        <p class="text-frost/40 text-sm leading-relaxed mb-6">
+                            For growing businesses and funded startups that need a comprehensive digital ecosystem. Multi-page experiences with advanced interactions and conversion systems.
+                        </p>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Up to 10 pages
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Advanced animations
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Conversion optimization
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                CMS integration
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Analytics setup
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                3 revision rounds
+                            </li>
+                        </ul>
+                        <a href="#inquiry" class="magnetic-btn w-full justify-center">
+                            <span class="magnetic-btn-inner w-full justify-center">Start with Growth</span>
+                        </a>
+                    </div>
+
+                    <div class="pricing-card">
+                        <div class="mb-6">
+                            <div class="text-frost/40 text-sm uppercase tracking-wider mb-2">Enterprise</div>
+                            <div class="font-display text-3xl font-bold text-frost">₹15,001+</div>
+                        </div>
+                        <p class="text-frost/40 text-sm leading-relaxed mb-6">
+                            For enterprise brands and complex digital products. Full-scale digital architecture with custom engineering, advanced integrations, and ongoing optimization.
+                        </p>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Unlimited pages
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Custom web application
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                API integrations
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Performance guarantee
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Priority support
+                            </li>
+                            <li class="flex items-center gap-3 text-sm text-frost/60">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Unlimited revisions
+                            </li>
+                        </ul>
+                        <a href="#inquiry" class="block w-full text-center py-3 rounded-xl border border-frost/10 text-frost/60 text-sm font-medium hover:border-gold/30 hover:text-gold transition-all">
+                            Discuss Enterprise
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-12 text-center">
+                    <p class="text-frost/30 text-sm">
+                        All projects include a detailed proposal after the Discovery phase. No hidden costs. No surprises.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Premium Inquiry Section -->
+    <section id="inquiry" class="relative py-32 lg:py-40">
+        <div class="w-full px-6 lg:px-12">
+            <div class="max-w-3xl mx-auto">
+                <div class="text-center mb-16">
+                    <div class="section-label justify-center mb-6">Client Onboarding</div>
+                    <h2 class="font-display text-4xl md:text-5xl font-semibold text-frost leading-tight mb-6">
+                        Selective collaboration.<br>
+                        <span class="text-gold italic">Serious inquiries only.</span>
+                    </h2>
+                    <p class="text-frost/40 max-w-lg mx-auto">
+                        I accept a limited number of projects per quarter. This ensures every client receives the attention and precision their business deserves.
+                    </p>
+                </div>
+
+                <div class="glass-strong rounded-3xl p-8 md:p-12">
+                    <div class="wizard-progress" id="wizardProgress">
+                        <div class="wizard-progress-bar active" data-step="1"></div>
+                        <div class="wizard-progress-bar" data-step="2"></div>
+                        <div class="wizard-progress-bar" data-step="3"></div>
+                        <div class="wizard-progress-bar" data-step="4"></div>
+                    </div>
+
+                    <form id="inquiryForm" onsubmit="return false;">
+                        <!-- Step 1: Project Type -->
+                        <div class="wizard-step active" data-step="1">
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-2">What are we building?</h3>
+                            <p class="text-frost/40 text-sm mb-8">Select the type of digital asset you need.</p>
+
+                            <div class="space-y-3 mb-8">
+                                <div class="radio-card" onclick="selectRadio(this, 'projectType', 'business')">
+                                    <div class="radio-circle"></div>
+                                    <div>
+                                        <div class="text-frost font-medium">Business Website</div>
+                                        <div class="text-frost/40 text-xs">Corporate presence, service showcase</div>
+                                    </div>
+                                </div>
+                                <div class="radio-card" onclick="selectRadio(this, 'projectType', 'ecommerce')">
+                                    <div class="radio-circle"></div>
+                                    <div>
+                                        <div class="text-frost font-medium">E-commerce / Product</div>
+                                        <div class="text-frost/40 text-xs">Online store, product platform</div>
+                                    </div>
+                                </div>
+                                <div class="radio-card" onclick="selectRadio(this, 'projectType', 'saas')">
+                                    <div class="radio-circle"></div>
+                                    <div>
+                                        <div class="text-frost font-medium">SaaS / Web Application</div>
+                                        <div class="text-frost/40 text-xs">Dashboard, platform, tool</div>
+                                    </div>
+                                </div>
+                                <div class="radio-card" onclick="selectRadio(this, 'projectType', 'landing')">
+                                    <div class="radio-circle"></div>
+                                    <div>
+                                        <div class="text-frost font-medium">Landing Page / Campaign</div>
+                                        <div class="text-frost/40 text-xs">Conversion-focused single page</div>
+                                    </div>
+                                </div>
+                                <div class="radio-card" onclick="selectRadio(this, 'projectType', 'other')">
+                                    <div class="radio-circle"></div>
+                                    <div>
+                                        <div class="text-frost font-medium">Something Else</div>
+                                        <div class="text-frost/40 text-xs">Custom requirement</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end">
+                                <button type="button" class="magnetic-btn" onclick="nextStep(1)">
+                                    <span class="magnetic-btn-inner">
+                                        Continue
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Budget -->
+                        <div class="wizard-step" data-step="2">
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-2">What's your investment range?</h3>
+                            <p class="text-frost/40 text-sm mb-8">This helps me understand the scope and complexity we can achieve.</p>
+
+                            <div class="space-y-3 mb-8">
+                                <div class="radio-card" onclick="selectRadio(this, 'budget', '5k-10k')">
+                                    <div class="radio-circle"></div>
+                                    <div>
+                                        <div class="text-frost font-medium">₹5,000 – ₹10,000</div>
+                                        <div class="text-frost/40 text-xs">Foundation tier — focused, strategic</div>
+                                    </div>
+                                </div>
+                                <div class="radio-card" onclick="selectRadio(this, 'budget', '10k-15k')">
+                                    <div class="radio-circle"></div>
+                                    <div>
+                                        <div class="text-frost font-medium">₹10,001 – ₹15,000</div>
+                                        <div class="text-frost/40 text-xs">Growth tier — comprehensive, advanced</div>
+                                    </div>
+                                </div>
+                                <div class="radio-card" onclick="selectRadio(this, 'budget', '15k+')">
+                                    <div class="radio-circle"></div>
+                                    <div>
+                                        <div class="text-frost font-medium">₹15,001+</div>
+                                        <div class="text-frost/40 text-xs">Enterprise tier — unlimited scope</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <button type="button" class="text-frost/40 text-sm font-medium hover:text-frost transition-colors" onclick="prevStep(2)">← Back</button>
+                                <button type="button" class="magnetic-btn" onclick="nextStep(2)">
+                                    <span class="magnetic-btn-inner">
+                                        Continue
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Timeline -->
+                        <div class="wizard-step" data-step="3">
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-2">When do you need this live?</h3>
+                            <p class="text-frost/40 text-sm mb-8">Realistic timelines ensure quality. Rush projects compromise precision.</p>
+
+                            <div class="space-y-3 mb-8">
+                                <div class="radio-card" onclick="selectRadio(this, 'timeline', '2-4weeks')">
+                                    <div class="radio-circle"></div>
+                                    <div>
+                                        <div class="text-frost font-medium">2 – 4 Weeks</div>
+                                        <div class="text-frost/40 text-xs">Focused sprint, limited scope</div>
+                                    </div>
+                                </div>
+                                <div class="radio-card" onclick="selectRadio(this, 'timeline', '1-2months')">
+                                    <div class="radio-circle"></div>
+                                    <div>
+                                        <div class="text-frost font-medium">1 – 2 Months</div>
+                                        <div class="text-frost/40 text-xs">Standard timeline, full process</div>
+                                    </div>
+                                </div>
+                                <div class="radio-card" onclick="selectRadio(this, 'timeline', '3months+')">
+                                    <div class="radio-circle"></div>
+                                    <div>
+                                        <div class="text-frost font-medium">3+ Months</div>
+                                        <div class="text-frost/40 text-xs">Complex product, iterative build</div>
+                                    </div>
+                                </div>
+                                <div class="radio-card" onclick="selectRadio(this, 'timeline', 'flexible')">
+                                    <div class="radio-circle"></div>
+                                    <div>
+                                        <div class="text-frost font-medium">Flexible</div>
+                                        <div class="text-frost/40 text-xs">Quality over speed</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <button type="button" class="text-frost/40 text-sm font-medium hover:text-frost transition-colors" onclick="prevStep(3)">← Back</button>
+                                <button type="button" class="magnetic-btn" onclick="nextStep(3)">
+                                    <span class="magnetic-btn-inner">
+                                        Continue
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Contact -->
+                        <div class="wizard-step" data-step="4">
+                            <h3 class="font-display text-2xl font-semibold text-frost mb-2">Let's talk details.</h3>
+                            <p class="text-frost/40 text-sm mb-8">Share your vision. I'll respond within 24 hours with a preliminary assessment.</p>
+
+                            <div class="space-y-4 mb-8">
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-frost/40 text-xs uppercase tracking-wider mb-2 block">Name</label>
+                                        <input type="text" class="form-input" placeholder="Your full name" required>
+                                    </div>
+                                    <div>
+                                        <label class="text-frost/40 text-xs uppercase tracking-wider mb-2 block">Company</label>
+                                        <input type="text" class="form-input" placeholder="Company or brand name">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-frost/40 text-xs uppercase tracking-wider mb-2 block">Email</label>
+                                    <input type="email" class="form-input" placeholder="you@company.com" required>
+                                </div>
+                                <div>
+                                    <label class="text-frost/40 text-xs uppercase tracking-wider mb-2 block">Tell me about your project</label>
+                                    <textarea class="form-input" rows="4" placeholder="What problem are you solving? What's the business objective? Who is your audience?" required></textarea>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center">
+                                <button type="button" class="text-frost/40 text-sm font-medium hover:text-frost transition-colors" onclick="prevStep(4)">← Back</button>
+                                <button type="submit" class="magnetic-btn" onclick="submitForm(event)">
+                                    <span class="magnetic-btn-inner">
+                                        Submit Inquiry
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="mt-12 flex flex-col md:flex-row items-center justify-center gap-8 text-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+                        </div>
+                        <div class="text-left">
+                            <div class="text-frost text-sm font-medium">hello@signatureaayush.com</div>
+                            <div class="text-frost/40 text-xs">Response within 24h</div>
+                        </div>
+                    </div>
+                    <div class="w-px h-8 bg-frost/10 hidden md:block"></div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                        </div>
+                        <div class="text-left">
+                            <div class="text-frost text-sm font-medium">+91 98765 43210</div>
+                            <div class="text-frost/40 text-xs">WhatsApp preferred</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative py-20 border-t border-frost/5">
+        <div class="w-full px-6 lg:px-12">
+            <div class="max-w-6xl mx-auto">
+                <div class="grid md:grid-cols-4 gap-12 mb-16">
+                    <div class="md:col-span-2">
+                        <a href="#" class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-goldDim flex items-center justify-center">
+                                <span class="text-obsidian font-bold text-sm">SA</span>
+                            </div>
+                            <span class="font-display text-xl font-semibold text-frost tracking-tight">Signature Aayush</span>
+                        </a>
+                        <p class="text-frost/40 text-sm leading-relaxed max-w-sm">
+                            Digital Architecture & Experience Engineering for brands that refuse to blend in.
+                        </p>
+                    </div>
+
+                    <div>
+                        <div class="text-frost/40 text-xs uppercase tracking-wider mb-4">Navigation</div>
+                        <ul class="space-y-3">
+                            <li><a href="#positioning" class="text-frost/60 text-sm hover:text-gold transition-colors">Positioning</a></li>
+                            <li><a href="#portfolio" class="text-frost/60 text-sm hover:text-gold transition-colors">Work</a></li>
+                            <li><a href="#services" class="text-frost/60 text-sm hover:text-gold transition-colors">Services</a></li>
+                            <li><a href="#process" class="text-frost/60 text-sm hover:text-gold transition-colors">Process</a></li>
+                            <li><a href="#inquiry" class="text-frost/60 text-sm hover:text-gold transition-colors">Inquire</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <div class="text-frost/40 text-xs uppercase tracking-wider mb-4">Connect</div>
+                        <ul class="space-y-3">
+                            <li><a href="#" class="text-frost/60 text-sm hover:text-gold transition-colors">LinkedIn</a></li>
+                            <li><a href="#" class="text-frost/60 text-sm hover:text-gold transition-colors">Dribbble</a></li>
+                            <li><a href="#" class="text-frost/60 text-sm hover:text-gold transition-colors">Twitter / X</a></li>
+                            <li><a href="#" class="text-frost/60 text-sm hover:text-gold transition-colors">GitHub</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-frost/5">
+                    <p class="text-frost/30 text-xs">
+                        &copy; 2026 Signature Aayush. All rights reserved. Crafted with precision in India.
+                    </p>
+                    <div class="flex items-center gap-6 mt-4 md:mt-0">
+                        <a href="#" class="text-frost/30 text-xs hover:text-frost/60 transition-colors">Privacy</a>
+                        <a href="#" class="text-frost/30 text-xs hover:text-frost/60 transition-colors">Terms</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // ========== LENIS SMOOTH SCROLL ==========
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+            infinite: false,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // Connect Lenis to GSAP ScrollTrigger
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => {
+            lenis.raf(time * 1000);
+        });
+        gsap.ticker.lagSmoothing(0);
+
+        // ========== WEBGL BACKGROUND ==========
+        const canvas = document.getElementById('webgl-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+
+        // Create flowing particles
+        const particleCount = 80;
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        const sizes = new Float32Array(particleCount);
+
+        for (let i = 0; i < particleCount; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 20;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+
+            // Gold-tinted colors
+            colors[i * 3] = 0.78 + Math.random() * 0.1;
+            colors[i * 3 + 1] = 0.66 + Math.random() * 0.1;
+            colors[i * 3 + 2] = 0.43 + Math.random() * 0.1;
+
+            sizes[i] = Math.random() * 2 + 0.5;
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+        const material = new THREE.PointsMaterial({
+            size: 0.05,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending,
+        });
+
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        // Mouse interaction
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        let scrollY = 0;
+        lenis.on('scroll', ({ scroll }) => {
+            scrollY = scroll;
+        });
+
+        function animateWebGL() {
+            requestAnimationFrame(animateWebGL);
+
+            const time = Date.now() * 0.0005;
+            const posArray = geometry.attributes.position.array;
+
+            for (let i = 0; i < particleCount; i++) {
+                posArray[i * 3 + 1] += Math.sin(time + i) * 0.002;
+                posArray[i * 3] += Math.cos(time + i * 0.5) * 0.001;
+            }
+
+            geometry.attributes.position.needsUpdate = true;
+
+            particles.rotation.y = mouseX * 0.1 + scrollY * 0.0002;
+            particles.rotation.x = mouseY * 0.05;
+
+            renderer.render(scene, camera);
+        }
+        animateWebGL();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ========== CURSOR GLOW ==========
+        const cursorGlow = document.getElementById('cursorGlow');
+        let cursorX = 0, cursorY = 0;
+        let isTouch = window.matchMedia('(pointer: coarse)').matches;
+
+        if (!isTouch) {
+            document.addEventListener('mousemove', (e) => {
+                cursorX = e.clientX;
+                cursorY = e.clientY;
+                cursorGlow.style.left = cursorX + 'px';
+                cursorGlow.style.top = cursorY + 'px';
+                cursorGlow.style.opacity = '1';
+            });
+            document.addEventListener('mouseleave', () => {
+                cursorGlow.style.opacity = '0';
+            });
+        }
+
+        // ========== NAVBAR SCROLL EFFECT ==========
+        const navbar = document.getElementById('navbar');
+        let lastScroll = 0;
+
+        lenis.on('scroll', ({ scroll }) => {
+            if (scroll > 100) {
+                navbar.classList.add('glass');
+                navbar.style.padding = '0.75rem 0';
+            } else {
+                navbar.classList.remove('glass');
+                navbar.style.padding = '';
+            }
+            lastScroll = scroll;
+        });
+
+        // ========== MOBILE MENU ==========
+        const hamburger = document.getElementById('hamburger');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            if (mobileMenu.classList.contains('active')) {
+                lenis.stop();
+            } else {
+                lenis.start();
+            }
+        });
+
+        function closeMobileMenu() {
+            hamburger.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            lenis.start();
+        }
+
+        // ========== HERO ANIMATIONS ==========
+        const heroTl = gsap.timeline({ delay: 0.3 });
+
+        heroTl.to('#heroLine1', {
+            y: 0,
+            duration: 1,
+            ease: 'power4.out'
+        })
+        .to('#heroLine2', {
+            y: 0,
+            duration: 1,
+            ease: 'power4.out'
+        }, '-=0.7')
+        .to('#heroLine3', {
+            y: 0,
+            duration: 1,
+            ease: 'power4.out'
+        }, '-=0.7')
+        .to('#heroLabel', {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: 'power3.out'
+        }, '-=0.5')
+        .to('#heroSub', {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: 'power3.out'
+        }, '-=0.5')
+        .to('#scrollInd', {
+            opacity: 1,
+            duration: 0.6,
+            ease: 'power2.out'
+        }, '-=0.3');
+
+        // Hero parallax on scroll
+        gsap.to('#heroLine1', {
+            y: -100,
+            scrollTrigger: {
+                trigger: '#hero',
+                start: 'top top',
+                end: 'bottom top',
+                scrub: 1
+            }
+        });
+
+        gsap.to('#heroLine2', {
+            y: -60,
+            scrollTrigger: {
+                trigger: '#hero',
+                start: 'top top',
+                end: 'bottom top',
+                scrub: 1
+            }
+        });
+
+        gsap.to('#heroLine3', {
+            y: -30,
+            scrollTrigger: {
+                trigger: '#hero',
+                start: 'top top',
+                end: 'bottom top',
+                scrub: 1
+            }
+        });
+
+        // ========== SCROLL REVEAL ANIMATIONS ==========
+        const revealElements = document.querySelectorAll('.section-label, h2, .gold-divider, p, .glass-strong, .service-card, .portfolio-card, .testimonial-card, .pricing-card, .process-step');
+
+        revealElements.forEach((el) => {
+            gsap.from(el, {
+                y: 40,
+                opacity: 0,
+                duration: 0.8,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: el,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none'
+                }
+            });
+        });
+
+        // ========== COUNTER ANIMATION ==========
+        const counters = document.querySelectorAll('.counter-value');
+        counters.forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-target'));
+
+            ScrollTrigger.create({
+                trigger: counter,
+                start: 'top 80%',
+                onEnter: () => {
+                    gsap.to(counter, {
+                        innerText: target,
+                        duration: 2,
+                        snap: { innerText: 1 },
+                        ease: 'power2.out'
+                    });
+                },
+                once: true
+            });
+        });
+
+        // ========== MAGNETIC BUTTONS ==========
+        const magneticBtns = document.querySelectorAll('.magnetic-btn');
+
+        if (!isTouch) {
+            magneticBtns.forEach(btn => {
+                btn.addEventListener('mousemove', (e) => {
+                    const rect = btn.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+
+                    gsap.to(btn, {
+                        x: x * 0.3,
+                        y: y * 0.3,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+
+                btn.addEventListener('mouseleave', () => {
+                    gsap.to(btn, {
+                        x: 0,
+                        y: 0,
+                        duration: 0.5,
+                        ease: 'elastic.out(1, 0.5)'
+                    });
+                });
+            });
+        }
+
+        // ========== WIZARD FORM ==========
+        let currentStep = 1;
+        const formData = {};
+
+        function selectRadio(element, name, value) {
+            // Remove selected from siblings
+            const parent = element.parentElement;
+            parent.querySelectorAll('.radio-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            formData[name] = value;
+        }
+
+        function updateProgress(step) {
+            const bars = document.querySelectorAll('.wizard-progress-bar');
+            bars.forEach((bar, index) => {
+                bar.classList.remove('active', 'completed');
+                if (index + 1 < step) {
+                    bar.classList.add('completed');
+                } else if (index + 1 === step) {
+                    bar.classList.add('active');
+                }
+            });
+        }
+
+        function nextStep(step) {
+            // Validate current step
+            const currentStepEl = document.querySelector(`.wizard-step[data-step="${step}"]`);
+            const selected = currentStepEl.querySelector('.radio-card.selected');
+
+            if (!selected && step < 4) {
+                // Shake animation for error
+                gsap.to(currentStepEl, {
+                    x: [-10, 10, -10, 10, 0],
+                    duration: 0.4,
+                    ease: 'power2.out'
+                });
+                return;
+            }
+
+            // Hide current step
+            const currentWizardStep = document.querySelector(`.wizard-step[data-step="${step}"]`);
+            gsap.to(currentWizardStep, {
+                opacity: 0,
+                y: -20,
+                duration: 0.3,
+                onComplete: () => {
+                    currentWizardStep.classList.remove('active');
+
+                    // Show next step
+                    currentStep++;
+                    updateProgress(currentStep);
+                    const nextWizardStep = document.querySelector(`.wizard-step[data-step="${currentStep}"]`);
+                    nextWizardStep.classList.add('active');
+                    gsap.fromTo(nextWizardStep, 
+                        { opacity: 0, y: 20 },
+                        { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }
+                    );
+                }
+            });
+        }
+
+        function prevStep(step) {
+            const currentWizardStep = document.querySelector(`.wizard-step[data-step="${step}"]`);
+            gsap.to(currentWizardStep, {
+                opacity: 0,
+                y: 20,
+                duration: 0.3,
+                onComplete: () => {
+                    currentWizardStep.classList.remove('active');
+                    currentStep--;
+                    updateProgress(currentStep);
+                    const prevWizardStep = document.querySelector(`.wizard-step[data-step="${currentStep}"]`);
+                    prevWizardStep.classList.add('active');
+                    gsap.fromTo(prevWizardStep,
+                        { opacity: 0, y: -20 },
+                        { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }
+                    );
+                }
+            });
+        }
+
+        function submitForm(e) {
+            e.preventDefault();
+            const form = document.getElementById('inquiryForm');
+            const inputs = form.querySelectorAll('input[required], textarea[required]');
+            let valid = true;
+
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    valid = false;
+                    gsap.to(input, {
+                        borderColor: '#ef4444',
+                        duration: 0.3,
+                        yoyo: true,
+                        repeat: 3
+                    });
+                }
+            });
+
+            if (!valid) return;
+
+            // Success animation
+            const currentWizardStep = document.querySelector(`.wizard-step[data-step="4"]`);
+            gsap.to(currentWizardStep, {
+                opacity: 0,
+                y: -20,
+                duration: 0.3,
+                onComplete: () => {
+                    currentWizardStep.classList.remove('active');
+
+                    // Create success message
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'wizard-step active text-center py-12';
+                    successDiv.innerHTML = `
+                        <div class="w-20 h-20 rounded-full bg-gold/10 flex items-center justify-center mx-auto mb-6">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                        </div>
+                        <h3 class="font-display text-3xl font-semibold text-frost mb-4">Inquiry Received</h3>
+                        <p class="text-frost/50 max-w-md mx-auto mb-8">Thank you for your interest. I'll review your project details and respond within 24 hours with a preliminary assessment and next steps.</p>
+                        <div class="text-frost/30 text-sm">
+                            Meanwhile, feel free to explore more of my work or connect on social media.
+                        </div>
+                    `;
+                    form.appendChild(successDiv);
+                    gsap.fromTo(successDiv,
+                        { opacity: 0, y: 20 },
+                        { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }
+                    );
+                }
+            });
+        }
+
+        // ========== SMOOTH SCROLL FOR ANCHOR LINKS ==========
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    lenis.scrollTo(target, { offset: -80 });
+                }
+            });
+        });
+
+        // ========== PORTFOLIO CARD PARALLAX ==========
+        document.querySelectorAll('.portfolio-card').forEach((card, index) => {
+            gsap.to(card, {
+                y: index % 2 === 0 ? -30 : 30,
+                scrollTrigger: {
+                    trigger: card,
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: 1
+                }
+            });
+        });
+
+        // ========== PROCESS LINE ANIMATION ==========
+        document.querySelectorAll('.process-step').forEach((step, index) => {
+            const line = step.querySelector('.process-line');
+            if (line) {
+                gsap.from(line, {
+                    scaleY: 0,
+                    transformOrigin: 'top',
+                    duration: 1,
+                    ease: 'power2.out',
+                    scrollTrigger: {
+                        trigger: step,
+                        start: 'top 70%',
+                        toggleActions: 'play none none none'
+                    }
+                });
+            }
+        });
+
+        // ========== REDUCED MOTION CHECK ==========
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) {
+            lenis.destroy();
+            gsap.globalTimeline.clear();
+            document.querySelectorAll('.reveal-text span').forEach(el => {
+                el.style.transform = 'none';
+            });
+        }
+    </script>
+</body>
+</html>
